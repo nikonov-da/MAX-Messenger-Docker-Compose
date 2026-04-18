@@ -69,4 +69,3 @@ fi
 echo ""
 log_success "Готово!"
 echo "Для просмотра информации о сети: docker network inspect $NETWORK_NAME"
-EOF
