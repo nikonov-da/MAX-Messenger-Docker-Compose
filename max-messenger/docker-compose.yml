@@ -16,11 +16,12 @@ services:
       max_isolated_network:
         ipv4_address: 172.20.0.100
 
-    # Безопасность
+    # Безопасность - запрет новых привилегий
     security_opt:
       - no-new-privileges:true
-      - seccomp:./max-messenger/bin/seccomp-max.json
+      - seccomp:./bin/seccomp-max.json
       - apparmor:docker-max-messenger
+      - label:disable
 
     # Капабилити (только необходимые)
     cap_add:
@@ -44,6 +45,7 @@ services:
       - LIBGL_ALWAYS_SOFTWARE=0
       - ELECTRON_NO_SANDBOX=1
       - SECRETS_SERVICE_IGNORE=1
+      - NO_AT_BRIDGE=1
       - NVIDIA_VISIBLE_DEVICES=all
       - NVIDIA_DRIVER_CAPABILITIES=all
 
@@ -53,7 +55,7 @@ services:
       - ${HOME}/.max:/home/maxuser/.config/max:rw
       - ./logs:/home/maxuser/logs:rw
 
-    # GPU (если есть)
+    # Проброс GPU
     deploy:
       resources:
         reservations:
@@ -66,3 +68,5 @@ services:
     restart: "no"
     stop_signal: SIGTERM
     stop_grace_period: 10s
+    stdin_open: false
+    tty: false

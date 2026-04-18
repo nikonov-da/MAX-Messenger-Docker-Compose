@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
 DESKTOP_DIR="$HOME/.local/share/applications"
 
 mkdir -p "$DESKTOP_DIR"
@@ -13,7 +14,7 @@ ICON_FIX="$SCRIPT_DIR/MAX-FIX-TOOL.png"
 [ ! -f "$ICON_DEBUG" ] && ICON_DEBUG=""
 [ ! -f "$ICON_FIX" ] && ICON_FIX=""
 
-# MAX Messenger
+# MAX Messenger (через скрипт)
 cat > "$DESKTOP_DIR/max-messenger.desktop" << EOF
 [Desktop Entry]
 Version=1.0
@@ -24,6 +25,23 @@ Comment=Запуск мессенджера MAX в Docker с полной изо
 Exec=${SCRIPT_DIR}/start-max.sh
 Icon=${ICON_MAIN:-utilities-terminal}
 Terminal=false
+StartupNotify=true
+StartupWMClass=max
+Categories=Network;Chat;InstantMessaging;
+Keywords=Messenger;MAX;
+EOF
+
+# MAX Messenger (через Docker Compose) - альтернатива
+cat > "$DESKTOP_DIR/max-messenger-compose.desktop" << EOF
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=MAX Messenger (Compose)
+GenericName=Messenger
+Comment=Запуск мессенджера MAX через Docker Compose
+Exec=${PROJECT_DIR}/run-compose.sh up
+Icon=${ICON_MAIN:-utilities-terminal}
+Terminal=true
 StartupNotify=true
 StartupWMClass=max
 Categories=Network;Chat;InstantMessaging;
@@ -74,6 +92,7 @@ chmod +x "$DESKTOP_DIR"/max-*.desktop
 
 echo "✓ Все десктопные ярлыки созданы"
 echo "  - MAX Messenger"
+echo "  - MAX Messenger (Compose)"
 echo "  - MAX Debug Tool"
 echo "  - MAX Fix Tool"
 echo "  - MAX Security Check"
