@@ -151,14 +151,10 @@ docker run --rm --gpus all nvidia/cuda:12.2.0-base-ubuntu22.04 nvidia-smi
 │   ├── max-debug.sh              # Диагностический инструмент
 │   ├── fix-after-reboot.sh       # Восстановление окружения
 │   ├── create-desktop-entries.sh # Создание всех ярлыков
-│   ├── create-desktop-fix-tool.sh # Создание ярлыка Fix Tool
 │   ├── seccomp-max.json          # Seccomp профиль безопасности
 │   ├── install-apparmor-profile.sh # Установка AppArmor
 │   ├── security-check.sh         # Проверка изоляции
-│   ├── setup-isolated-network.sh # Создание изолированной сети
-│   ├── MAX-1024x1024.png         # Иконка приложения
-│   ├── MAX-DEBUG-TOOL.png        # Иконка отладки
-│   └── MAX-FIX-TOOL.png          # Иконка восстановления
+│   └── setup-isolated-network.sh # Создание изолированной сети
 ├── docker/
 │   └── Dockerfile                # Docker образ
 ├── docker-compose.yml            # Docker Compose конфиг
