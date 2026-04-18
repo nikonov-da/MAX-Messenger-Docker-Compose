@@ -151,10 +151,12 @@ docker run --rm --gpus all nvidia/cuda:12.2.0-base-ubuntu22.04 nvidia-smi
 /home/denis/max-messenger/
 ├── bin/
 │   ├── start-max.sh              # Основной скрипт запуска
+│   ├── start-max(AppArmor).sh    # Скрипт запуска для Ubuntu с поддержкой AppArmor
 │   ├── max-debug.sh              # Диагностический инструмент
 │   ├── fix-after-reboot.sh       # Восстановление окружения
 │   ├── create-desktop-entries.sh # Создание всех ярлыков
 │   ├── seccomp-max.json          # Seccomp профиль безопасности
+│   ├── setup-selinux.sh          # Установка SELinux
 │   ├── install-apparmor-profile.sh # Установка AppArmor
 │   ├── security-check.sh         # Проверка изоляции
 │   └── setup-isolated-network.sh # Создание изолированной сети
@@ -272,7 +274,7 @@ CMD ["--use-gl=egl"]
 
 Создайте `~/max-messenger/bin/seccomp-max.json` (содержимое предоставлено выше).
 
-### 3. Скрипт установки AppArmor для Ubuntu или selinux для Fedora
+### 3. Скрипт установки AppArmor для Ubuntu или SELinux для Fedora
 
 Создайте `~/max-messenger/bin/setup-selinux.sh` (содержимое предоставлено выше только для Fedora).
 Создайте `~/max-messenger/bin/install-apparmor-profile.sh` (содержимое предоставлено выше только для Ubuntu).
@@ -488,7 +490,7 @@ docker network create \
   max_isolated_network
 ```
 
-### 2. Установка SElinux (Fedora) или AppArmor профиля (Ubuntu)
+### 2. Установка SELinux (Fedora) или AppArmor профиля (Ubuntu)
 
 ```bash
 ~/max-messenger/bin/setup-selinux.sh
@@ -746,7 +748,7 @@ cd ~/max-messenger
 После выполнения всех шагов вы получите:
 
 - ✅ **Полностью изолированное окружение** (сеть, ФС, капабилити)
-- ✅ **Seccomp и AppArmor профили безопасности**
+- ✅ **Seccomp и SELinux/AppArmor профили безопасности**
 - ✅ **Аппаратное ускорение NVIDIA GPU**
 - ✅ **Docker Compose для удобного управления**
 - ✅ **Пять десктопных ярлыков** для всех операций
@@ -763,7 +765,7 @@ cd ~/max-messenger
 │  │  │  • Сеть: max_isolated_network (172.20.0.100/16)     │  │  │
 │  │  │  • Капабилити: только NET_ADMIN, NET_RAW            │  │  │
 │  │  │  • Seccomp: Белый список syscalls                   │  │  │
-│  │  │  • AppArmor: docker-max-messenger                   │  │  │
+│  │  │  • SELinux/AppArmor: docker-max-messenger           │  │  │
 │  │  │  • Root ФС: Read-only                               │  │  │
 │  │  │  • tmpfs: /tmp, /run, .config/max                   │  │  │
 │  │  │  • GPU: NVIDIA (опционально)                        │  │  │
