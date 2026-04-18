@@ -10,6 +10,8 @@
 6. [Создание скриптов с изоляцией](#создание-скриптов-с-изоляцией)
 7. [Docker Compose](#docker-compose)
 8. [Настройка безопасности](#настройка-безопасности)
+   - 8.1 [SELinux для Fedora](#81-selinux-для-fedora)
+   - 8.2 [AppArmor для Ubuntu/Debian](#82-apparmor-для-ubuntudebian)
 9. [Сборка образа](#сборка-образа)
 10. [Запуск и управление](#запуск-и-управление)
 11. [Создание десктопных ярлыков](#создание-десктопных-ярлыков)
@@ -264,14 +266,16 @@ CMD ["--use-gl=egl"]
 ### 1. Основной скрипт `start-max.sh`
 
 Создайте `~/max-messenger/bin/start-max.sh` (содержимое предоставлено выше).
+Создайте `~/max-messenger/bin/start-max(AppArmor).sh` (старый скрпт для AppArmor - работает только на Ubuntu - переименовать в 'start-max.sh' с заменой).
 
 ### 2. Seccomp профиль `seccomp-max.json`
 
 Создайте `~/max-messenger/bin/seccomp-max.json` (содержимое предоставлено выше).
 
-### 3. Скрипт установки AppArmor `install-apparmor-profile.sh`
+### 3. Скрипт установки AppArmor для Ubuntu или selinux для Fedora
 
-Создайте `~/max-messenger/bin/install-apparmor-profile.sh` (содержимое предоставлено выше).
+Создайте `~/max-messenger/bin/setup-selinux.sh` (содержимое предоставлено выше только для Fedora).
+Создайте `~/max-messenger/bin/install-apparmor-profile.sh` (содержимое предоставлено выше только для Ubuntu).
 
 ### 4. Скрипт проверки безопасности `security-check.sh`
 
@@ -484,7 +488,11 @@ docker network create \
   max_isolated_network
 ```
 
-### 2. Установка AppArmor профиля
+### 2. Установка SElinux (Fedora) или AppArmor профиля (Ubuntu)
+
+```bash
+~/max-messenger/bin/setup-selinux.sh
+```
 
 ```bash
 ~/max-messenger/bin/install-apparmor-profile.sh

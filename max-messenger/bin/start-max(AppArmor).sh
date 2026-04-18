@@ -105,12 +105,6 @@ if [ -e "/run/user/1000/bus" ]; then
     log_success "DBus сокет найден"
 fi
 
-# Формирование опций безопасности (AppArmor только для Ubuntu)
-SECURITY_OPTS="--security-opt no-new-privileges:true --security-opt seccomp=${SCRIPT_DIR}/seccomp-max.json"
-if command -v apparmor_parser &> /dev/null; then
-    SECURITY_OPTS="$SECURITY_OPTS --security-opt apparmor=docker-max-messenger"
-fi
-
 log_info "Запуск MAX Messenger в изолированном окружении..."
 echo "---"
 
@@ -121,7 +115,9 @@ docker run \
     --network "${NETWORK_NAME}" \
     --ip "${CONTAINER_IP}" \
     \
-    ${SECURITY_OPTS} \
+    --security-opt no-new-privileges:true \
+    --security-opt seccomp="${SCRIPT_DIR}/seccomp-max.json" \
+    --security-opt apparmor="docker-max-messenger" \
     --security-opt label=disable \
     \
     --cap-drop ALL \

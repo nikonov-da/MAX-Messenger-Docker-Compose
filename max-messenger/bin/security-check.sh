@@ -97,15 +97,36 @@ else
     echo -e "${RED}✗ Seccomp профиль не найден${NC}"
 fi
 
-# AppArmor
-if command -v apparmor_parser &> /dev/null; then
-    if aa-status 2>/dev/null | grep -q "docker-max-messenger"; then
-        echo -e "${GREEN}✓ AppArmor профиль: docker-max-messenger${NC}"
+# Проверка SELinux (для Fedora)
+if command -v getenforce &> /dev/null; then
+    SELINUX_STATUS=$(getenforce)
+    if [ "$SELINUX_STATUS" = "Enforcing" ]; then
+        echo -e "${GREEN}✓ SELinux: Enforcing (активен)${NC}"
+    elif [ "$SELINUX_STATUS" = "Permissive" ]; then
+        echo -e "${YELLOW}⚠ SELinux: Permissive (только логирование)${NC}"
     else
-        echo -e "${YELLOW}⚠ AppArmor профиль не загружен${NC}"
+        echo -e "${RED}✗ SELinux: Disabled (отключен)${NC}"
+    fi
+
+    # Проверка нарушений SELinux
+    if command -v ausearch &> /dev/null; then
+        AVC_COUNT=$(sudo ausearch -m avc -ts recent 2>/dev/null | grep -c "avc" || echo "0")
+        if [ "$AVC_COUNT" -gt 0 ]; then
+            echo -e "  ${YELLOW}⚠ Нарушений SELinux за последнее время: $AVC_COUNT${NC}"
+            echo "    Для просмотра: sudo ausearch -m avc -ts recent"
+        fi
     fi
 else
-    echo -e "${YELLOW}⚠ AppArmor не установлен (только для Ubuntu/Debian)${NC}"
+    # Проверка AppArmor (для Ubuntu/Debian)
+    if command -v apparmor_parser &> /dev/null; then
+        if aa-status 2>/dev/null | grep -q "docker-max-messenger"; then
+            echo -e "${GREEN}✓ AppArmor профиль: docker-max-messenger${NC}"
+        else
+            echo -e "${YELLOW}⚠ AppArmor профиль не загружен${NC}"
+        fi
+    else
+        echo -e "${YELLOW}⚠ SELinux/AppArmor не обнаружены${NC}"
+    fi
 fi
 
 echo ""
