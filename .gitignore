@@ -1,0 +1,27 @@
+# Логи
+logs/
+*.log
+
+# Конфигурация пользователя
+.max/
+*.lock
+Singleton*
+
+# Docker
+*.pid
+*.tmp
+
+# Редакторы
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Системные файлы
+.DS_Store
+Thumbs.db
+
+# Временные файлы
+tmp/
+temp/
+*.tmp
