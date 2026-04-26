@@ -1,30 +1,21 @@
 {
-  "defaultAction": "SCMP_ACT_ERRNO",
-  "defaultErrnoRet": 1,
+  "defaultAction": "SCMP_ACT_ALLOW",
   "architectures": ["SCMP_ARCH_X86_64"],
   "syscalls": [
     {
+      "comment": "Запрещённые опасные системные вызовы",
       "names": [
-        "read", "write", "open", "close", "mmap", "munmap", "mprotect",
-        "brk", "rt_sigaction", "rt_sigprocmask", "ioctl", "access",
-        "pipe", "select", "socket", "connect", "accept", "recvfrom",
-        "sendto", "recvmsg", "sendmsg", "bind", "listen", "getsockname",
-        "getpeername", "setsockopt", "getsockopt", "exit", "exit_group",
-        "wait4", "kill", "uname", "getpid", "getppid", "getuid", "geteuid",
-        "getgid", "getegid", "gettid", "sysinfo", "times", "gettimeofday",
-        "time", "clock_gettime", "nanosleep", "getrandom"
-      ],
-      "action": "SCMP_ACT_ALLOW"
-    },
-    {
-      "names": [
-        "mount", "umount2", "pivot_root", "chroot", "reboot", "kexec_load",
+        "mount", "umount2", "pivot_root", "chroot", "reboot",
         "init_module", "finit_module", "delete_module", "ioperm", "iopl",
-        "ptrace", "perf_event_open", "bpf", "personality", "process_vm_readv",
-        "process_vm_writev", "kcmp", "seccomp", "keyctl", "add_key",
-        "request_key", "unshare", "setns"
+        "bpf", "personality", "keyctl", "add_key", "request_key",
+        "unshare", "setns", "swapon", "swapoff"
       ],
       "action": "SCMP_ACT_ERRNO"
+    },
+    {
+      "comment": "Разрешённые (ptrace нужен для Qt)",
+      "names": ["ptrace"],
+      "action": "SCMP_ACT_ALLOW"
     }
   ]
 }

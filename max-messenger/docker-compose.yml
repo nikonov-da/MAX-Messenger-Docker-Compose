@@ -1,6 +1,5 @@
-version: '3.8'
+# docker-compose.yml для MAX Messenger (изолированная сеть)
 
-# Изолированная сеть
 networks:
   max_isolated_network:
     external: true
@@ -11,51 +10,67 @@ services:
     image: max-messenger:latest
     container_name: max_messenger
 
-    # Сеть с фиксированным IP
     networks:
       max_isolated_network:
         ipv4_address: 172.20.0.100
 
-    # Безопасность - запрет новых привилегий
     security_opt:
       - no-new-privileges:true
-      - seccomp:./bin/seccomp-max.json
-      - apparmor:docker-max-messenger
-      - label:disable
+      - seccomp:${PWD}/bin/seccomp-max.json
+      # Добавляем SELinux метку для X11
+      - label=type:container_t
 
-    # Капабилити (только необходимые)
-    cap_add:
-      - NET_ADMIN
-      - NET_RAW
-    cap_drop:
-      - ALL
-
-    # Read-only корневая ФС
     read_only: true
     tmpfs:
       - /tmp:rw,noexec,nosuid,size=128M
       - /run:rw,noexec,nosuid,size=64M
-      - /home/maxuser/.config/max:rw,noexec,nosuid,size=256M
 
-    # Переменные окружения
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+      - IPC_LOCK
+    cap_drop:
+      - ALL
+
     environment:
-      - DISPLAY=${DISPLAY:-:0}
+      - DISPLAY=:0
       - QT_QPA_PLATFORM=xcb
       - QT_X11_NO_MITSHM=1
       - LIBGL_ALWAYS_SOFTWARE=0
       - ELECTRON_NO_SANDBOX=1
       - SECRETS_SERVICE_IGNORE=1
       - NO_AT_BRIDGE=1
+      - GDK_BACKEND=x11
+      - HOME=/tmp
       - NVIDIA_VISIBLE_DEVICES=all
       - NVIDIA_DRIVER_CAPABILITIES=all
+      - DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus
+      - XDG_RUNTIME_DIR=/run/user/1000
+      - LC_ALL=ru_RU.UTF-8
+      - LANG=ru_RU.UTF-8
+      - DBUS_FATAL_WARNINGS=0
+      - GSETTINGS_BACKEND=memory
+      - QT_LOGGING_RULES=qt.qpa.*=false
+      - QT_PLUGIN_PATH=/usr/lib/x86_64-linux-gnu/qt5/plugins
+      - LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu:/lib/x86_64-linux-gnu
 
-    # Тома (монтирование)
     volumes:
-      - /tmp/.X11-unix/X0:/tmp/.X11-unix/X0:ro
-      - ${HOME}/.max:/home/maxuser/.config/max:rw
-      - ./logs:/home/maxuser/logs:rw
+      # Проброс X11 с правильными SELinux метками
+      - /tmp/.X11-unix/X0:/tmp/.X11-unix/X0:rw,Z
+      - /run/user/1000/bus:/run/user/1000/bus:ro,Z
+      - ${HOME}/.max:/root/.config/max:rw,Z
+      - ./logs:/root/logs:rw,Z
+      - /etc/machine-id:/etc/machine-id:ro
+      - /run/user/1000/pulse:/run/user/1000/pulse:ro,Z
 
-    # Проброс GPU
+    devices:
+      - /dev/dri:/dev/dri
+      - /dev/snd:/dev/snd
+
+    group_add:
+      - audio
+      - video
+
     deploy:
       resources:
         reservations:
@@ -64,9 +79,14 @@ services:
               count: all
               capabilities: [gpu]
 
-    # Политики
     restart: "no"
     stop_signal: SIGTERM
     stop_grace_period: 10s
-    stdin_open: false
-    tty: false
+    init: true
+
+    healthcheck:
+      test: ["CMD-SHELL", "pidof max || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s

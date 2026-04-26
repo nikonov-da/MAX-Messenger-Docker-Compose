@@ -36,8 +36,13 @@ case "$1" in
         echo "💻 Вход в контейнер..."
         docker compose exec max-messenger bash
         ;;
+    prune)
+        echo "🧹 Очистка..."
+        docker compose down
+        docker system prune -f
+        ;;
     *)
-        echo "Использование: $0 {up|up-d|down|restart|logs|build|status|exec}"
+        echo "Использование: $0 {up|up-d|down|restart|logs|build|status|exec|prune}"
         echo ""
         echo "Команды:"
         echo "  up      - Запуск с выводом логов"
@@ -48,6 +53,7 @@ case "$1" in
         echo "  build   - Пересборка образа"
         echo "  status  - Статус контейнера"
         echo "  exec    - Вход в контейнер"
+        echo "  prune   - Очистка и остановка"
         exit 1
         ;;
 esac

@@ -58,6 +58,7 @@ log_info "Подготовка окружения для MAX Messenger"
 if [ "$(docker ps -q -f name=^/${CONTAINER}$)" ]; then
     log_warning "Остановка запущенного контейнера..."
     docker stop "${CONTAINER}" >/dev/null 2>&1
+    sleep 2
 fi
 
 if [ "$(docker ps -aq -f name=^/${CONTAINER}$)" ]; then
@@ -105,16 +106,13 @@ if [ -e "/run/user/1000/bus" ]; then
     log_success "DBus сокет найден"
 fi
 
-# Формирование опций безопасности (AppArmor только для Ubuntu)
+# Формирование опций безопасности
 SECURITY_OPTS="--security-opt no-new-privileges:true --security-opt seccomp=${SCRIPT_DIR}/seccomp-max.json"
-if command -v apparmor_parser &> /dev/null; then
-    SECURITY_OPTS="$SECURITY_OPTS --security-opt apparmor=docker-max-messenger"
-fi
 
 log_info "Запуск MAX Messenger в изолированном окружении..."
 echo "---"
 
-# Запуск с максимальной изоляцией
+# Запуск с максимальной изоляцией (ВОССТАНОВЛЕНА read-only ФС)
 docker run \
     --name "${CONTAINER}" \
     --rm \
@@ -122,16 +120,14 @@ docker run \
     --ip "${CONTAINER_IP}" \
     \
     ${SECURITY_OPTS} \
-    --security-opt label=disable \
-    \
-    --cap-drop ALL \
-    --cap-add NET_ADMIN \
-    --cap-add NET_RAW \
     \
     --read-only \
     --tmpfs /tmp:rw,noexec,nosuid,size=128M \
     --tmpfs /run:rw,noexec,nosuid,size=64M \
-    --tmpfs "${CONFIG_DIR}":rw,noexec,nosuid,size=256M \
+    \
+    --cap-drop ALL \
+    --cap-add NET_ADMIN \
+    --cap-add NET_RAW \
     \
     -e DISPLAY="${DISPLAY}" \
     -e QT_QPA_PLATFORM="xcb" \
